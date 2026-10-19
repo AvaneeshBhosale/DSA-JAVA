@@ -1,0 +1,149 @@
+import java.util.*;
+
+// Q1) Palindrome Linked List
+class Solution {
+
+    static class CharNode {
+        char data;
+        CharNode next;
+
+        CharNode(char data) {
+            this.data = data;
+        }
+    }
+
+    static boolean isPalindrome(CharNode head) {
+        Stack<Character> stack = new Stack<>();
+        CharNode temp = head;
+
+        while (temp != null) {
+            stack.push(temp.data);
+            temp = temp.next;
+        }
+
+        temp = head;
+
+        while (temp != null) {
+            if (temp.data != stack.pop()) {
+                return false;
+            }
+            temp = temp.next;
+        }
+
+        return true;
+    }
+
+    // Q2) Simplify Path
+    static String simplifyPath(String path) {
+        Stack<String> stack = new Stack<>();
+        String[] parts = path.split("/");
+
+        for (String part : parts) {
+            if (part.equals("") || part.equals(".")) {
+                continue;
+            } else if (part.equals("..")) {
+                if (!stack.isEmpty()) {
+                    stack.pop();
+                }
+            } else {
+                stack.push(part);
+            }
+        }
+
+        StringBuilder result = new StringBuilder();
+
+        for (String part : stack) {
+            result.append("/").append(part);
+        }
+
+        return result.length() == 0 ? "/" : result.toString();
+    }
+
+    // Q3) Decode a String
+    static String decodeString(String s) {
+        Stack<Integer> countStack = new Stack<>();
+        Stack<StringBuilder> stringStack = new Stack<>();
+
+        StringBuilder current = new StringBuilder();
+        int count = 0;
+
+        for (char ch : s.toCharArray()) {
+            if (Character.isDigit(ch)) {
+                count = count * 10 + (ch - '0');
+            } else if (ch == '[') {
+                countStack.push(count);
+                stringStack.push(current);
+
+                current = new StringBuilder();
+                count = 0;
+            } else if (ch == ']') {
+                int repeat = countStack.pop();
+                StringBuilder previous = stringStack.pop();
+
+                for (int i = 0; i < repeat; i++) {
+                    previous.append(current);
+                }
+
+                current = previous;
+            } else {
+                current.append(ch);
+            }
+        }
+
+        return current.toString();
+    }
+
+    // Q4) Trapping Rain Water using a Stack
+    static int trap(int[] height) {
+        Stack<Integer> stack = new Stack<>();
+        int water = 0;
+
+        for (int i = 0; i < height.length; i++) {
+            while (!stack.isEmpty()
+                    && height[i] > height[stack.peek()]) {
+
+                int bottom = stack.pop();
+
+                if (stack.isEmpty()) {
+                    break;
+                }
+
+                int left = stack.peek();
+                int width = i - left - 1;
+
+                int boundedHeight =
+                    Math.min(height[left], height[i])
+                    - height[bottom];
+
+                water += width * boundedHeight;
+            }
+
+            stack.push(i);
+        }
+
+        return water;
+    }
+
+    public static void main(String[] args) {
+        // Q1
+        CharNode head = new CharNode('A');
+        head.next = new CharNode('B');
+        head.next.next = new CharNode('C');
+        head.next.next.next = new CharNode('B');
+        head.next.next.next.next = new CharNode('A');
+
+        System.out.println("Q1: " + isPalindrome(head));
+
+        // Q2
+        System.out.println("Q2: " +
+            simplifyPath("/apnacollege/"));
+
+        // Q3
+        System.out.println("Q3: " +
+            decodeString("3[b2[v]]L"));
+
+        // Q4
+        int[] arr = {7, 0, 4, 2, 5, 0, 6, 4, 0, 6};
+        System.out.println("Q4: " + trap(arr));
+    }
+}
