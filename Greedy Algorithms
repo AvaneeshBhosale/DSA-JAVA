@@ -1,0 +1,131 @@
+import java.util.*;
+
+// Q1) Maximum Balanced String Partitions
+static int maxBalancedPartitions(String str) {
+    int balance = 0;
+    int count = 0;
+
+    for (char ch : str.toCharArray()) {
+        if (ch == 'L') {
+            balance++;
+        } else if (ch == 'R') {
+            balance--;
+        }
+
+        if (balance == 0) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+// Q2) Kth Largest Odd Number in a Given Range
+static int kthLargestOdd(int L, int R, int K) {
+    if (K <= 0) {
+        return 0;
+    }
+
+    if (R % 2 == 0) {
+        R--;
+    }
+
+    long answer = (long) R - 2L * (K - 1);
+
+    if (answer < L || answer < Integer.MIN_VALUE) {
+        return 0;
+    }
+
+    return (int) answer;
+}
+
+// Q3) Lexicographically Smallest String of Length N and Sum K
+static String smallestString(int N, int K) {
+    if (N <= 0 || K < N || (long) K > 26L * N) {
+        return "";
+    }
+
+    char[] result = new char[N];
+    Arrays.fill(result, 'a');
+
+    int remaining = K - N;
+
+    for (int i = N - 1; i >= 0 && remaining > 0; i--) {
+        int add = Math.min(25, remaining);
+        result[i] += add;
+        remaining -= add;
+    }
+
+    return new String(result);
+}
+
+// Q4) Best Time to Buy and Sell Stock
+static int maxProfit(int[] prices) {
+    if (prices == null || prices.length < 2) {
+        return 0;
+    }
+
+    int minPrice = prices[0];
+    int maxProfit = 0;
+
+    for (int i = 1; i < prices.length; i++) {
+        maxProfit = Math.max(maxProfit, prices[i] - minPrice);
+        minPrice = Math.min(minPrice, prices[i]);
+    }
+
+    return maxProfit;
+}
+
+// Q5) Split Array into K Subarrays
+// Assumes all array elements are non-negative.
+static long splitArray(int[] arr, int K) {
+    if (arr == null || arr.length == 0
+            || K < 1 || K > arr.length) {
+        return -1;
+    }
+
+    long low = 0;
+    long high = 0;
+
+    for (int value : arr) {
+        if (value < 0) {
+            throw new IllegalArgumentException(
+                "Array must contain non-negative values");
+        }
+
+        low = Math.max(low, value);
+        high += value;
+    }
+
+    while (low < high) {
+        long mid = low + (high - low) / 2;
+
+        if (canSplit(arr, K, mid)) {
+            high = mid;
+        } else {
+            low = mid + 1;
+        }
+    }
+
+    return low;
+}
+
+static boolean canSplit(int[] arr, int K, long maxSum) {
+    int subarrays = 1;
+    long currentSum = 0;
+
+    for (int value : arr) {
+        if (currentSum + value > maxSum) {
+            subarrays++;
+            currentSum = value;
+
+            if (subarrays > K) {
+                return false;
+            }
+        } else {
+            currentSum += value;
+        }
+    }
+
+    return true;
+}
