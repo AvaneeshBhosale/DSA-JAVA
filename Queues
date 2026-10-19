@@ -1,0 +1,208 @@
+import java.util.*;
+
+class Solution {
+
+    // Q1) soln - Generate Binary Numbers from 1 to N
+    static void generatePrintBinary(int n) {
+        Queue<String> q = new LinkedList<>();
+        q.add("1");
+
+        for (int i = 0; i < n; i++) {
+            String current = q.remove();
+            System.out.print(current + " ");
+
+            q.add(current + "0");
+            q.add(current + "1");
+        }
+
+        System.out.println();
+    }
+
+    // Q2) soln - Minimum Cost to Connect Ropes
+    static long minCost(int[] arr) {
+        PriorityQueue<Long> pq = new PriorityQueue<>();
+
+        for (int value : arr) {
+            pq.add((long) value);
+        }
+
+        long totalCost = 0;
+
+        while (pq.size() > 1) {
+            long first = pq.poll();
+            long second = pq.poll();
+
+            long cost = first + second;
+            totalCost += cost;
+            pq.add(cost);
+        }
+
+        return totalCost;
+    }
+
+    // Q3) soln - Job Sequencing for Maximum Profit
+    static class Job {
+        char id;
+        int deadline;
+        int profit;
+
+        Job(char id, int deadline, int profit) {
+            this.id = id;
+            this.deadline = deadline;
+            this.profit = profit;
+        }
+    }
+
+    static void printJobScheduling(Job[] jobs) {
+        Arrays.sort(jobs,
+            (a, b) -> Integer.compare(b.profit, a.profit));
+
+        int maxDeadline = 0;
+
+        for (Job job : jobs) {
+            maxDeadline = Math.max(maxDeadline, job.deadline);
+        }
+
+        char[] slots = new char[maxDeadline + 1];
+        boolean[] occupied = new boolean[maxDeadline + 1];
+
+        int totalProfit = 0;
+
+        for (Job job : jobs) {
+            for (int slot = Math.min(job.deadline, maxDeadline);
+                 slot >= 1; slot--) {
+
+                if (!occupied[slot]) {
+                    occupied[slot] = true;
+                    slots[slot] = job.id;
+                    totalProfit += job.profit;
+                    break;
+                }
+            }
+        }
+
+        System.out.print("Jobs scheduled: ");
+
+        for (int i = 1; i <= maxDeadline; i++) {
+            if (occupied[i]) {
+                System.out.print(slots[i] + " ");
+            }
+        }
+
+        System.out.println();
+        System.out.println("Total profit: " + totalProfit);
+    }
+
+    // Q4) soln - Minimum Knight Moves
+    static int minStepToReachTarget(
+            int[] knightPos, int[] targetPos, int N) {
+
+        int[] dx = {-2, -1, 1, 2, -2, -1, 1, 2};
+        int[] dy = {-1, -2, -2, -1, 1, 2, 2, 1};
+
+        boolean[][] visited = new boolean[N + 1][N + 1];
+        Queue<int[]> q = new LinkedList<>();
+
+        q.add(new int[]{
+            knightPos[0], knightPos[1], 0
+        });
+
+        visited[knightPos[0]][knightPos[1]] = true;
+
+        while (!q.isEmpty()) {
+            int[] current = q.remove();
+
+            int x = current[0];
+            int y = current[1];
+            int distance = current[2];
+
+            if (x == targetPos[0] && y == targetPos[1]) {
+                return distance;
+            }
+
+            for (int i = 0; i < 8; i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+
+                if (nx >= 1 && nx <= N
+                        && ny >= 1 && ny <= N
+                        && !visited[nx][ny]) {
+
+                    visited[nx][ny] = true;
+                    q.add(new int[]{nx, ny, distance + 1});
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    // Q5) soln - Maximum of Every Sliding Window
+    static void printMax(int[] arr, int k) {
+        if (arr == null || k <= 0 || k > arr.length) {
+            return;
+        }
+
+        Deque<Integer> deque = new LinkedList<>();
+
+        for (int i = 0; i < arr.length; i++) {
+
+            // Remove indices outside the current window
+            while (!deque.isEmpty() && deque.peekFirst() <= i - k) {
+                deque.removeFirst();
+            }
+
+            // Remove smaller values from the back
+            while (!deque.isEmpty()
+                    && arr[deque.peekLast()] <= arr[i]) {
+                deque.removeLast();
+            }
+
+            deque.addLast(i);
+
+            // Print maximum once the first window is complete
+            if (i >= k - 1) {
+                System.out.print(arr[deque.peekFirst()] + " ");
+            }
+        }
+
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+
+        // Q1
+        System.out.print("Q1: ");
+        generatePrintBinary(10);
+
+        // Q2
+        int[] ropes = {4, 3, 2, 6};
+        System.out.println("Q2: " + minCost(ropes));
+
+        // Q3
+        Job[] jobs = {
+            new Job('a', 2, 100),
+            new Job('b', 1, 19),
+            new Job('c', 2, 27),
+            new Job('d', 1, 25),
+            new Job('e', 3, 15)
+        };
+        System.out.println("Q3:");
+        printJobScheduling(jobs);
+
+        // Q4
+        int N = 30;
+        int[] knightPos = {1, 1};
+        int[] targetPos = {30, 30};
+
+        System.out.println("Q4: " +
+            minStepToReachTarget(knightPos, targetPos, N));
+
+        // Q5
+        int[] arr = {12, 1, 78, 90, 57, 89, 56};
+        int k = 3;
+
+        System.out.print("Q5: ");
+        printMax(arr, k);
+    }
+}
