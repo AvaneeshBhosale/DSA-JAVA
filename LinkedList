@@ -1,0 +1,311 @@
+// Q1) soln - Intersection Point of Two Linked Lists
+// Q2) soln - Skip M Nodes and Delete N Nodes
+// Q3) soln - Swap Two Nodes
+// Q4) soln - Segregate Even and Odd Nodes
+// Q5) soln - Merge K Sorted Linked Lists
+
+class Solution {
+
+    static class Node {
+        int data;
+        Node next;
+
+        Node(int data) {
+            this.data = data;
+        }
+    }
+
+    // Q1) Find Intersection Point
+    // Intersection means the same node, not just equal data.
+   
+static Node getIntersectionNode(Node head1, Node head2) {
+        Node a = head1;
+
+        while (a != null) {
+            Node b = head2;
+
+            while (b != null) {
+                if (a == b) {
+                    return a;
+                }
+                b = b.next;
+            }
+
+            a = a.next;
+        }
+
+        return null;
+    }
+
+    // Q2) Skip M Nodes and Delete N Nodes
+    static Node skipMdeleteN(Node head, int M, int N) {
+        if (head == null || M <= 0) {
+            return null;
+        }
+
+        if (N <= 0) {
+            return head;
+        }
+
+        Node curr = head;
+
+        while (curr != null) {
+            // Skip M nodes
+            for (int count = 1;
+                 count < M && curr != null;
+                 count++) {
+                curr = curr.next;
+            }
+
+            if (curr == null) {
+                break;
+            }
+
+            // Delete the next N nodes
+            Node temp = curr.next;
+
+            for (int count = 0;
+                 count < N && temp != null;
+                 count++) {
+                temp = temp.next;
+            }
+
+            curr.next = temp;
+            curr = temp;
+        }
+
+        return head;
+    }
+
+    // Q3) Swap Two Nodes by Their Values
+    static Node swapNodes(Node head, int x, int y) {
+        if (x == y || head == null) {
+            return head;
+        }
+
+        Node prevX = null, currX = head;
+        while (currX != null && currX.data != x) {
+            prevX = currX;
+            currX = currX.next;
+        }
+
+        Node prevY = null, currY = head;
+        while (currY != null && currY.data != y) {
+            prevY = currY;
+            currY = currY.next;
+        }
+
+        if (currX == null || currY == null) {
+            return head;
+        }
+
+        // Connect previous nodes to the opposite nodes
+        if (prevX != null) {
+            prevX.next = currY;
+        } else {
+            head = currY;
+        }
+
+        if (prevY != null) {
+            prevY.next = currX;
+        } else {
+            head = currX;
+        }
+
+        // Swap next pointers
+        Node temp = currX.next;
+        currX.next = currY.next;
+        currY.next = temp;
+
+        return head;
+    }
+
+    // Q4) Segregate Even and Odd Nodes
+    // All even nodes appear before odd nodes.
+    static Node segregateEvenOdd(Node head) {
+        Node evenHead = null, evenTail = null;
+        Node oddHead = null, oddTail = null;
+
+        Node curr = head;
+
+        while (curr != null) {
+            Node nextNode = curr.next;
+            curr.next = null;
+
+            if (curr.data % 2 == 0) {
+                if (evenHead == null) {
+                    evenHead = evenTail = curr;
+                } else {
+                    evenTail.next = curr;
+                    evenTail = curr;
+                }
+            } else {
+                if (oddHead == null) {
+                    oddHead = oddTail = curr;
+                } else {
+                    oddTail.next = curr;
+                    oddTail = curr;
+                }
+            }
+
+            curr = nextNode;
+        }
+
+        if (evenHead == null) {
+            return oddHead;
+        }
+
+        evenTail.next = oddHead;
+        return evenHead;
+    }
+
+    // Q5) Merge K Sorted Linked Lists
+    static Node mergeTwoLists(Node a, Node b) {
+        Node dummy = new Node(0);
+        Node tail = dummy;
+
+        while (a != null && b != null) {
+            if (a.data <= b.data) {
+                tail.next = a;
+                a = a.next;
+            } else {
+                tail.next = b;
+                b = b.next;
+            }
+
+            tail = tail.next;
+        }
+
+        tail.next = (a != null) ? a : b;
+
+        return dummy.next;
+    }
+
+    static Node mergeKLists(Node[] lists) {
+        if (lists == null || lists.length == 0) {
+            return null;
+        }
+
+        int interval = 1;
+
+        while (interval < lists.length) {
+            for (int i = 0;
+                 i + interval < lists.length;
+                 i += interval * 2) {
+
+                lists[i] = mergeTwoLists(
+                    lists[i],
+                    lists[i + interval]
+                );
+            }
+
+            interval *= 2;
+        }
+
+        return lists[0];
+    }
+
+    // Helper: Insert at the beginning
+    static Node push(Node head, int data) {
+        Node newNode = new Node(data);
+        newNode.next = head;
+        return newNode;
+    }
+
+    // Helper: Print a linked list
+    static void printList(Node head) {
+        Node curr = head;
+
+        while (curr != null) {
+            System.out.print(curr.data);
+
+            if (curr.next != null) {
+                System.out.print(" -> ");
+            }
+
+            curr = curr.next;
+        }
+
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+
+        // Q1) Intersection Point
+        Node common = new Node(15);
+        common.next = new Node(30);
+
+        Node head1 = new Node(10);
+        head1.next = common;
+
+        Node head2 = new Node(3);
+        head2.next = new Node(6);
+        head2.next.next = new Node(9);
+        head2.next.next.next = common;
+
+        Node intersection = getIntersectionNode(head1, head2);
+
+        System.out.println("Q1: " +
+            (intersection == null
+                ? "No Intersection"
+                : intersection.data));
+
+        // Q2) Skip M, Delete N
+        Node list2 = null;
+        for (int i = 10; i >= 1; i--) {
+            list2 = push(list2, i);
+        }
+
+        list2 = skipMdeleteN(list2, 2, 3);
+
+        System.out.print("Q2: ");
+        printList(list2);
+
+        // Q3) Swap Nodes
+        Node list3 = null;
+        for (int i = 7; i >= 1; i--) {
+            list3 = push(list3, i);
+        }
+
+        list3 = swapNodes(list3, 4, 3);
+
+        System.out.print("Q3: ");
+        printList(list3);
+
+        // Q4) Segregate Even and Odd
+        Node list4 = null;
+        int[] values = {11, 10, 8, 6, 4, 2, 0};
+
+        for (int i = values.length - 1; i >= 0; i--) {
+            list4 = push(list4, values[i]);
+        }
+
+        list4 = segregateEvenOdd(list4);
+
+        System.out.print("Q4: ");
+        printList(list4);
+
+        // Q5) Merge K Sorted Lists
+        Node[] lists = new Node[3];
+
+        lists[0] = new Node(1);
+        lists[0].next = new Node(3);
+        lists[0].next.next = new Node(5);
+        lists[0].next.next.next = new Node(7);
+
+        lists[1] = new Node(2);
+        lists[1].next = new Node(4);
+        lists[1].next.next = new Node(6);
+        lists[1].next.next.next = new Node(8);
+
+        lists[2] = new Node(0);
+        lists[2].next = new Node(9);
+        lists[2].next.next = new Node(10);
+        lists[2].next.next.next = new Node(11);
+
+        Node merged = mergeKLists(lists);
+
+        System.out.print("Q5: ");
+        printList(merged);
+    }
+}
