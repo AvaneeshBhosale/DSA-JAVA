@@ -1,0 +1,431 @@
+#1
+
+import java.util.*;
+
+class Solution {
+
+    // Q1: Detect cycle in an undirected graph using BFS
+
+    static void addEdge(ArrayList<Integer>[] adj, int u, int v) {
+        adj[u].add(v);
+        adj[v].add(u);
+    }
+
+    static boolean isCyclicConnected(
+        ArrayList<Integer>[] adj, int s, int V, boolean[] visited) {
+
+        int[] parent = new int[V];
+        Arrays.fill(parent, -1);
+
+        Queue<Integer> q = new LinkedList<>();
+
+        visited[s] = true;
+        q.add(s);
+
+        while (!q.isEmpty()) {
+            int u = q.poll();
+
+            for (int v : adj[u]) {
+
+                if (!visited[v]) {
+                    visited[v] = true;
+                    q.add(v);
+                    parent[v] = u;
+                }
+
+                // Visited neighbour other than parent means cycle
+                else if (parent[u] != v) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // Check all disconnected components
+    static boolean isCyclicDisconnected(
+        ArrayList<Integer>[] adj, int V) {
+
+        boolean[] visited = new boolean[V];
+
+        for (int i = 0; i < V; i++) {
+            if (!visited[i] &&
+                isCyclicConnected(adj, i, V, visited)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static void main(String[] args) {
+
+        int V = 4;
+
+        ArrayList<Integer>[] adj = new ArrayList[V];
+
+        for (int i = 0; i < V; i++) {
+            adj[i] = new ArrayList<>();
+        }
+
+        addEdge(adj, 0, 1);
+        addEdge(adj, 1, 2);
+        addEdge(adj, 2, 0);
+        addEdge(adj, 2, 3);
+
+        if (isCyclicDisconnected(adj, V))
+            System.out.println("Yes");
+        else
+            System.out.println("No");
+    }
+}
+
+
+
+#2
+
+
+import java.util.*;
+
+class Solution {
+
+    // Q2: Find minimum depth of a binary tree using BFS
+
+    static class Node {
+        int data;
+        Node left, right;
+
+        Node(int data) {
+            this.data = data;
+        }
+    }
+
+    // Stores node and its depth
+    static class QItem {
+        Node node;
+        int depth;
+
+        QItem(Node node, int depth) {
+            this.node = node;
+            this.depth = depth;
+        }
+    }
+
+    static int minDepth(Node root) {
+
+        if (root == null)
+            return 0;
+
+        Queue<QItem> q = new LinkedList<>();
+        q.add(new QItem(root, 1));
+
+        while (!q.isEmpty()) {
+
+            QItem qi = q.poll();
+
+            Node node = qi.node;
+            int depth = qi.depth;
+
+            // First leaf node encountered
+            if (node.left == null && node.right == null)
+                return depth;
+
+            if (node.left != null)
+                q.add(new QItem(node.left, depth + 1));
+
+            if (node.right != null)
+                q.add(new QItem(node.right, depth + 1));
+        }
+
+        return 0;
+    }
+
+    public static void main(String[] args) {
+
+        Node root = new Node(1);
+
+        root.left = new Node(2);
+        root.right = new Node(3);
+        root.left.left = new Node(4);
+        root.left.right = new Node(5);
+
+        System.out.println(minDepth(root));
+    }
+}
+
+
+#3
+
+
+import java.util.*;
+
+class Solution {
+
+    // Q3: Find minimum time required to rot all oranges
+
+    static int R = 3;
+    static int C = 5;
+
+    static class Ele {
+        int x, y;
+
+        Ele(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    static boolean isValid(int i, int j) {
+        return i >= 0 && j >= 0 && i < R && j < C;
+    }
+
+    static int rottenOranges(int[][] arr) {
+
+        Queue<Ele> q = new LinkedList<>();
+        int fresh = 0;
+        int time = 0;
+
+        // Add all rotten oranges initially
+        for (int i = 0; i < R; i++) {
+            for (int j = 0; j < C; j++) {
+
+                if (arr[i][j] == 2)
+                    q.add(new Ele(i, j));
+
+                else if (arr[i][j] == 1)
+                    fresh++;
+            }
+        }
+
+        // Four possible directions
+        int[] dx = {-1, 1, 0, 0};
+        int[] dy = {0, 0, -1, 1};
+
+        while (!q.isEmpty() && fresh > 0) {
+
+            int size = q.size();
+
+            // Process one level at a time
+            for (int i = 0; i < size; i++) {
+
+                Ele temp = q.poll();
+
+                for (int k = 0; k < 4; k++) {
+
+                    int nx = temp.x + dx[k];
+                    int ny = temp.y + dy[k];
+
+                    if (isValid(nx, ny) && arr[nx][ny] == 1) {
+
+                        arr[nx][ny] = 2;
+                        fresh--;
+
+                        q.add(new Ele(nx, ny));
+                    }
+                }
+            }
+
+            time++;
+        }
+
+        // Fresh oranges still remaining
+        if (fresh > 0)
+            return -1;
+
+        return time;
+    }
+
+    public static void main(String[] args) {
+
+        int[][] arr = {
+            {2, 1, 0, 2, 1},
+            {1, 0, 1, 2, 1},
+            {1, 0, 0, 2, 1}
+        };
+
+        int ans = rottenOranges(arr);
+
+        if (ans == -1)
+            System.out.println("All oranges cannot rot");
+        else
+            System.out.println(
+                "Time required for all oranges to rot = " + ans
+            );
+    }
+}
+
+
+#4
+
+
+class Solution {
+
+    // Q4: Find the largest connected region in a binary matrix
+
+    static int ROW, COL, count;
+
+    static boolean isSafe(
+        int[][] M, int row, int col, boolean[][] visited) {
+
+        return row >= 0 && row < ROW &&
+               col >= 0 && col < COL &&
+               M[row][col] == 1 &&
+               !visited[row][col];
+    }
+
+    static void DFS(
+        int[][] M, int row, int col, boolean[][] visited) {
+
+        // All 8 neighbouring directions
+        int[] rowNbr = {-1, -1, -1, 0, 0, 1, 1, 1};
+        int[] colNbr = {-1, 0, 1, -1, 1, -1, 0, 1};
+
+        visited[row][col] = true;
+
+        for (int k = 0; k < 8; k++) {
+
+            int newRow = row + rowNbr[k];
+            int newCol = col + colNbr[k];
+
+            if (isSafe(M, newRow, newCol, visited)) {
+
+                count++;
+
+                DFS(M, newRow, newCol, visited);
+            }
+        }
+    }
+
+    static int largestRegion(int[][] M) {
+
+        boolean[][] visited = new boolean[ROW][COL];
+
+        int result = 0;
+
+        for (int i = 0; i < ROW; i++) {
+
+            for (int j = 0; j < COL; j++) {
+
+                if (M[i][j] == 1 && !visited[i][j]) {
+
+                    count = 1;
+
+                    DFS(M, i, j, visited);
+
+                    result = Math.max(result, count);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static void main(String[] args) {
+
+        int[][] M = {
+            {0, 0, 1, 1, 0},
+            {1, 0, 1, 1, 0},
+            {0, 1, 0, 0, 0},
+            {0, 0, 0, 0, 1}
+        };
+
+        ROW = 4;
+        COL = 5;
+
+        System.out.println(largestRegion(M));
+    }
+}
+
+
+#5
+
+
+import java.util.*;
+
+class Solution {
+
+    // Q5: Find shortest transformation sequence from start to target
+
+    static int shortestChainLen(
+        String start, String target, Set<String> D) {
+
+        if (start.equals(target))
+            return 1;
+
+        if (!D.contains(target))
+            return 0;
+
+        int level = 0;
+        int wordlength = start.length();
+
+        Queue<String> Q = new LinkedList<>();
+
+        Q.add(start);
+
+        while (!Q.isEmpty()) {
+
+            level++;
+
+            int sizeofQ = Q.size();
+
+            for (int i = 0; i < sizeofQ; i++) {
+
+                char[] word = Q.poll().toCharArray();
+
+                for (int pos = 0; pos < wordlength; pos++) {
+
+                    char orig_char = word[pos];
+
+                    // Try replacing each character with a-z
+                    for (char c = 'a'; c <= 'z'; c++) {
+
+                        word[pos] = c;
+
+                        String newWord = String.valueOf(word);
+
+                        // Target reached
+                        if (newWord.equals(target))
+                            return level + 1;
+
+                        // Check dictionary
+                        if (!D.contains(newWord))
+                            continue;
+
+                        // Remove to avoid visiting again
+                        D.remove(newWord);
+
+                        Q.add(newWord);
+                    }
+
+                    // Restore original character
+                    word[pos] = orig_char;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public static void main(String[] args) {
+
+        Set<String> D = new HashSet<>();
+
+        D.add("poon");
+        D.add("plee");
+        D.add("same");
+        D.add("poie");
+        D.add("plie");
+        D.add("poin");
+        D.add("plea");
+
+        String start = "toon";
+        String target = "plea";
+
+        System.out.println(
+            "Length of shortest chain is: " +
+            shortestChainLen(start, target, D)
+        );
+    }
+}
+
